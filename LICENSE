@@ -1,0 +1,19 @@
+This software includes third-party libraries with their own licenses. See:
+src/jsrsasign/LICENSE
+src/jsSHA/LICENSE
+src/sql.js/LICENSE
+src/venn.js/LICENSE
+src/jszip/jszip.min.js
+src/qunit/qunit-2.9.2.js
+src/d3js/LICENSE
+src/datatables/LICENSE
+src/datatables/buttons/LICENSE
+src/jquery/LICENSE
+src/jquery-ui/LICENSE
+
+THIS SOFTWARE IS LICENSED FOR USE ONLY TO THE REVIEWERS OF PAM 2020 CONFERENCE UNTIL THE END OF THE CONFERENCE.
+
+The code of this software is anonymized to comply with the requirements 
+of the anonymous submission process of PAM 2020 Conference. 
+https://pam2020.cs.uoregon.edu/
+

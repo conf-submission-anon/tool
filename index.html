@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Certificate Transparency Root Explorer</title>
+  <link rel="stylesheet" type="text/css" href="./css/explorer.css">
+  <link rel="stylesheet" type="text/css" href="./css/jquery-ui.min.css">
+</head>
+
+<!-- D3 -->
+<script type="text/javascript" src="./src/d3js/d3.min.js"></script>
+
+<!-- jQuery and jQuery UI -->
+<script type="text/javascript" src="./src/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./src/jquery-ui/jquery-ui.min.js"></script>
+
+<!-- benfred/venn.js -->
+<script type="text/javascript" src="./src/venn.js/venn.js"></script>
+
+<!-- Miscellaneous functions -->
+<script type="text/javascript" src="./src/misc.js"></script>
+
+<!-- kripken/sql.js -->
+<script type="text/javascript" src="./src/sql.js/js/sql-memory-growth.js"></script>
+
+<!-- emn178/js-sha256 -->
+<script type="text/javascript" src="./src/jsSHA/src/sha256.js"></script>
+
+<!-- kjur/jsrsasign -->
+<!--ERRORS <script type="text/javascript" src="https://kjur.github.io/jsrsasign/jsrsasign-all-min.js"></script>
+<script type="text/javascript" src="https://kjur.github.io/jsrsasign/src/x509-1.1.js"></script>-->
+<!-- Modified kjur/jsrsasign with support of non-compliant certificates -->
+<script type="text/javascript" src="./src/jsrsasign/jsrsasign-all-experimental.js"></script>
+<script type="text/javascript" src="./src/jsrsasign/src/x509-1.1-experimental.js"></script>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="./css/dataTables.jqueryui.min.css">
+<link rel="stylesheet" href="./css/buttons.dataTables.min.css">
+<script type="text/javascript" src="./src/datatables/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="./src/datatables/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="./src/datatables/buttons/buttons.html5.min.js"></script>
+<script type="text/javascript" src="./src/datatables/buttons/buttons.print.min.js"></script>
+
+<!-- JSZip -->
+<script type="text/javascript" src="./src/jszip/jszip.min.js"></script>
+
+<!-- Main scripts -->
+<script type="text/javascript" src="src/RootExplorerDB.js"></script>
+<script type="text/javascript" src="src/RootExplorer.js"></script>
+<script type="text/javascript">
+  $(document).ready(RootExplorer.view.start);
+</script>
+
+<body>
+  <div id="progressbar">
+    <a href="index.html"><b id="progress-label">Certificate Transparency Root Explorer [Offline]</b></a>
+    <a id="testLink" href="test.html?moduleId=3d395d83&moduleId=d8614993&moduleId=2148f2f5&moduleId=7f7e43f1"></a>
+    <span id="dumpDatabaseButton" class="ui-icon ui-icon-disk" style="display:none" title="Make a snapshot of logs and roots" onclick="RootExplorer.dumpDatabase()"></span>
+  </div>
+  <hr>
+  <div id="main">
+
+    <div id="dialog-confirm" title="Caution: Experimental tool">
+      <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>This is an EXPERIMENTAL tool. Please read the following disclaimer before running:</p>
+      <IFRAME id="readme" src="./README.md"></IFRAME>
+      <input type="file" id="dump" style="display:none">
+    </div>
+
+    <div id="tabs">
+      <ul>
+        <li><a href="#root-intersections-panel">Euler Intersections</a></li>
+        <li><a id="#root-explorer-link" href="#root-explorer-panel">Certificates</a></li>
+        <li><a href="#root-frequency-distribution-panel" onclick="RootExplorer.view.plotRootFrequencyDistribution()">Root Frequency Distribution</a></li>
+        <li><a href="#root-explorer-panel" onclick="RootExplorer.view.exploreUnion()">Union</a></li>
+      </ul>
+      <div id="root-intersections-panel">
+        <div id="venn">
+          <p id="venn-approximate-warning"><span class="ui-icon ui-icon-alert"></span>Warning: Current diagram is approximate, some intersections may be unrepresented.</p>
+          <div id="venntooltip" class="venntooltip"></div>
+        </div>
+        <hr>
+        Press any letter on your keyboard to move between layers. <button onClick="RootExplorer.view.vennShuffleLayers()">Shuffle layers</button>
+        <hr>
+        <div id="venn-settings">
+
+          <label for="intersection-depth">Intersection depth</label>
+          <select title="WARNING: higher number may crash the page" name="intersection-depth" id="intersection-depth">
+            <option selected="selected">2</option>
+            <option>3</option>
+          </select>
+        </div>
+      </div>
+
+
+      <div id="root-explorer-panel">
+        <h3 class='intersection'></h3>
+        <div id="intersection">
+          <table class="display compact root-explorer-table" width="100%">
+            <thead>
+              <th>Subject</th>
+              <th title="If subject != issuer">Issuer</th>
+              <th>notBefore</th>
+              <th>notAfter</th>
+              <th class="x509">x509</th>
+              <th>Signature</th>
+              <th>fingerprint</th>
+            </thead>
+          </table>
+        </div>
+        <br><hr><br>
+        <h3 class='complement'></h3>
+        <div id="complement">
+          <table class="display compact root-explorer-table" width="100%">
+            <thead>
+              <th>Subject</th>
+              <th title="If subject != issuer">Issuer</th>
+              <th>notBefore</th>
+              <th>notAfter</th>
+              <th class="x509">x509</th>
+              <th>Signature</th>
+              <th>fingerprint</th>
+              <th>Logs</th>
+
+            </thead>
+          </table>
+        </div>
+      </div>
+
+      <div id="root-frequency-distribution-panel">
+        <div id="root-frequencies"></div>
+        <p>Frequency is a number of logs/stores a root certificate is included in. </p>
+        <p>(Range: from 0 to the number of selected stores)</p>
+      </div>
+      <div id="union"></div>
+    </div>
+
+    <div id="vis">
+
+    </div>
+    <div id="logs">
+      <h4>Root-stores</h4><div class="other"></div>
+      <h4>Online logs</h4><div class="ok"></div>
+      <h4 title='Some logs could be listed as unavailable due to TLS, CORS or other browser restrictions'>Unavailable logs*</h4><div class="unavailable"></div>
+
+    </div>
+  </div>
+</body>
+</html>
